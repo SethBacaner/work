@@ -10,10 +10,19 @@ import (
 )
 
 type TemplateArgs struct {
-	TaskName string
+	TaskName     string
+	StructString string
 }
 
-func GenerateTemplate(templateArgs TemplateArgs) {
+func GenerateTask(source string, taskName string) {
+
+	structString := getStructString(source)
+
+	templateArgs := TemplateArgs{
+		TaskName:     taskName,
+		StructString: structString,
+	}
+
 	t := template.Must(template.New("task").Parse(taskTemplate))
 
 	rc, wc, errCh := pipe.Commands(
@@ -28,9 +37,19 @@ func GenerateTemplate(templateArgs TemplateArgs) {
 			}
 		}
 	}()
+	// t.Execute(os.Stdout, templateArgs)
 	t.Execute(wc, templateArgs)
 	wc.Close()
 	io.Copy(os.Stdout, rc)
+
+	// outputFile := "gen/" + taskName + ".go"
+	// f, err := os.Create(outputFile)
+	// if err != nil {
+	// 	panic(err)
+	// }
+
+	// w := bufio.NewWriter(f)
+	// io.Copy(w, rc)
 }
 
 var taskTemplate = `package gen
@@ -40,11 +59,7 @@ import (
 	"github.com/samuelbacaner/worker/internal"
 )
 
-// TODO: this needs to be generated more manually
-type {{.TaskName}}Args struct {
-	a int
-	b int
-}
+{{.StructString}}
 
 type {{.TaskName}} interface {
 	Invoke(ctx context.Context, args {{.TaskName}}Args) error

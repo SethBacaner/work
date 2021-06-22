@@ -5,10 +5,9 @@ import (
 	"github.com/samuelbacaner/worker/internal"
 )
 
-// TODO: this needs to be generated more manually
 type AdderArgs struct {
-	a int
-	b int
+	A int `json:"a"`
+	B int `json:"b"`
 }
 
 type Adder interface {
