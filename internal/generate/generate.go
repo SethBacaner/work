@@ -56,7 +56,7 @@ var taskTemplate = `package gen
 
 import (
 	"context"
-	"github.com/samuelbacaner/worker/internal"
+	"github.com/sethbacaner/worker/internal"
 )
 
 {{.StructString}}

@@ -3,7 +3,8 @@ package main
 import (
 	"context"
 	"fmt"
-	worker "github.com/samuelbacaner/worker/internal"
+
+	worker "github.com/sethbacaner/worker/internal"
 )
 
 /*

@@ -2,7 +2,8 @@ package gen
 
 import (
 	"context"
-	"github.com/samuelbacaner/worker/internal"
+
+	worker "github.com/samuelbacaner/worker/internal"
 )
 
 type AdderArgs struct {

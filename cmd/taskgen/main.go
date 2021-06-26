@@ -2,7 +2,8 @@ package main
 
 import (
 	"flag"
-	"github.com/samuelbacaner/worker/internal/generate"
+
+	"github.com/sethbacaner/worker/internal/generate"
 )
 
 /*
