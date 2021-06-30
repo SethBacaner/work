@@ -1,4 +1,4 @@
-module github.com/sethbacaner/worker
+module github.com/sethbacaner/work
 
 go 1.15
 

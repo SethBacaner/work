@@ -2,8 +2,7 @@ package gen
 
 import (
 	"context"
-
-	worker "github.com/sethbacaner/worker/internal"
+	"github.com/sethbacaner/work/internal"
 )
 
 type AdderArgs struct {
@@ -15,7 +14,7 @@ type Adder interface {
 	Invoke(ctx context.Context, args AdderArgs) error
 }
 
-func RegisterAdder(manager worker.Manager, Adder Adder) {
+func RegisterAdder(manager internal.Manager, Adder Adder) {
 
 	taskFn := func(ctx context.Context, args interface{}) error {
 		AdderArgs, ok := args.(AdderArgs)
@@ -26,7 +25,11 @@ func RegisterAdder(manager worker.Manager, Adder Adder) {
 		return Adder.Invoke(ctx, AdderArgs)
 	}
 
-	manager.RegisterTask("Adder", taskFn)
+	argsFactory := func() interface{} {
+		return &AdderArgs{}
+	}
+
+	manager.RegisterTask("Adder", argsFactory, taskFn)
 }
 
 // TODO: need to generate EnqueuerCLient

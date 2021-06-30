@@ -3,7 +3,7 @@ package main
 import (
 	"flag"
 
-	"github.com/sethbacaner/worker/internal/generate"
+	"github.com/sethbacaner/work/internal/generate"
 )
 
 /*

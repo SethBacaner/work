@@ -56,7 +56,7 @@ var taskTemplate = `package gen
 
 import (
 	"context"
-	"github.com/sethbacaner/worker/internal"
+	"github.com/sethbacaner/work/internal"
 )
 
 {{.StructString}}
@@ -65,7 +65,7 @@ type {{.TaskName}} interface {
 	Invoke(ctx context.Context, args {{.TaskName}}Args) error
 }
 
-func Register{{.TaskName}}(manager worker.Manager, {{.TaskName}} {{.TaskName}}) {
+func Register{{.TaskName}}(manager internal.Manager, {{.TaskName}} {{.TaskName}}) {
 
 	taskFn := func(ctx context.Context, args interface{}) error {
 		{{.TaskName}}Args, ok := args.({{.TaskName}}Args)

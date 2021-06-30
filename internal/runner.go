@@ -1,51 +1,65 @@
-package worker
+package internal
 
 import (
 	"context"
 	"fmt"
 	"time"
+
+	"github.com/sethbacaner/work/internal/pool"
+	"github.com/sethbacaner/work/internal/queue"
 )
 
 type Runner interface {
-	DoTask(task Task)
-	MaxDuration() time.Duration
+	Run(ctx context.Context, pool pool.Pool, queue queue.Queue, registry *Registry)
 }
 
-type RunnerImpl struct {
-	manager Manager
+func NewRunner() Runner {
+	return &RunnerImpl{}
 }
 
-// could run this as `go r.DoTask(task)`
-func (ri *RunnerImpl) DoTask(task Task) {
-	timeout := task.Timeout()
+type RunnerImpl struct{}
 
-	ctx := ri.manager.Context()
+func (ri *RunnerImpl) Run(ctx context.Context, pool pool.Pool, queue queue.Queue, registry *Registry) {
+	for {
+		select {
+		case <-ctx.Done():
+			return
+		// TODO: receive message on channel indicating there's an available worker
+		case <-time.After(1 * time.Second):
+			if pool.AvailableWorkers() <= 0 {
+				continue
+			}
 
-	if timeout != nil {
-		ctx, cancelFn := context.WithTimeout(ctx, *timeout)
-		ctx = ctx
-		defer cancelFn()
+			serializedTask, err := queue.Dequeue(ctx)
+
+			if err != nil {
+				fmt.Println(err.Error())
+				continue
+			}
+
+			if serializedTask == "" {
+				continue
+			}
+
+			pool.Execute(func() {
+				DoTask(ctx, serializedTask, *registry)
+			})
+		}
+	}
+}
+
+// TODO: task might need to be reenqueued here.
+func DoTask(ctx context.Context, serializedTask string, registry Registry) {
+
+	args, definition, err := Deserialize(serializedTask, registry)
+	if err != nil {
+		fmt.Println(err)
+		return
 	}
 
-	args := task.Args() // assume that args are the right type
-
-	name := task.Name()
-	taskFn := ri.manager.GetRegisteredTaskFunction(name) // assume taskFn is the right type
-
-	// TODO: do something with this error
-	err := taskFn(ctx, args)
-
-	fmt.Println(err)
+	err = definition.TaskFn(ctx, args)
+	if err != nil {
+		fmt.Println(err)
+	}
 	// if retries were configured, use error to enqueue a retry, etc.
 }
-
-/*
-user writes
-func(ctx context.Context, an arg of arbitrary type) error
-serializer
-deserializer
-*/
-
-type JobOpt string
-
-func Enqueue(ctx context.Context, taskName string, serializedArgs string, opts ...JobOpt)
